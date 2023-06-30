@@ -59,7 +59,9 @@ export class App extends Component {
     }
     if (page !== prevState.page && page !== 1) {
       try {
-        this.setState({ isShowLoader: true });
+        totalLoads === page
+          ? this.setState({ isShowLoadMore: false })
+          : this.setState({ isShowLoader: true });
         const images = await fetchImagesWithQuery(query, page);
         this.setState({ images: [...this.state.images, ...images.response] });
         this.state.isShowLoadMore
@@ -71,9 +73,6 @@ export class App extends Component {
       } finally {
         this.setState({ isShowLoader: false });
       }
-    }
-    if (totalLoads === page) {
-      this.setState({ isShowLoadMore: false });
     }
   }
 
