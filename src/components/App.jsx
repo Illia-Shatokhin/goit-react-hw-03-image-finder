@@ -72,7 +72,7 @@ export class App extends Component {
         this.setState({ isShowLoader: false });
       }
     }
-    if (totalLoads === page || query === prevState.query) {
+    if (totalLoads === page) {
       this.setState({ isShowLoadMore: false });
     }
   }
