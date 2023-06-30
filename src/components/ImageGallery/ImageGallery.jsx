@@ -1,5 +1,6 @@
 import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 import { ImageGalleryList } from './ImageGallery.styled';
+import PropTypes from 'prop-types';
 
 export const ImageGallery = ({ images, openModal }) => {
   return (
@@ -17,4 +18,9 @@ export const ImageGallery = ({ images, openModal }) => {
       })}
     </ImageGalleryList>
   );
+};
+
+ImageGallery.propTypes = {
+  images: PropTypes.arrayOf(PropTypes.object.isRequired),
+  openModal: PropTypes.func.isRequired,
 };

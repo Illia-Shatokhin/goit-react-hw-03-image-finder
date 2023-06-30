@@ -104,9 +104,10 @@ export class App extends Component {
   };
 
   closeModal = e => {
-    window.removeEventListener('keydown', this.escListener);
-    e.target.nodeName === 'DIV' &&
+    if (e.target.nodeName === 'DIV') {
       this.setState({ isShowModal: false, largeImage: '' });
+      window.removeEventListener('keydown', this.escListener);
+    }
   };
 
   render() {
