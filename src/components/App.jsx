@@ -34,16 +34,28 @@ export class App extends Component {
   };
 
   async componentDidUpdate(prevProps, prevState) {
-    const { query, page, totalLoads } = this.state;
+    const { query, page } = this.state;
     if (query !== prevState.query) {
       try {
         this.setState({ isShowLoader: true });
         const images = await fetchImagesWithQuery(query, page);
-        this.setState({
-          images: images.response,
-          totalLoads: Math.ceil(images.totalHits / 12),
-          isShowLoadMore: true,
-        });
+        this.setState(
+          {
+            images: images.response,
+            totalLoads: Math.ceil(images.totalHits / 12),
+            isShowLoadMore: true,
+          },
+          () => {
+            if (
+              this.state.totalLoads / this.state.page === 1 ||
+              this.state.images.length === 0
+            ) {
+              this.setState({
+                isShowLoadMore: false,
+              });
+            }
+          }
+        );
         images.response.length
           ? toast.success(
               `Your posts were successfully fetched! ${images.totalHits} results`,
@@ -59,14 +71,15 @@ export class App extends Component {
     }
     if (page !== prevState.page && page !== 1) {
       try {
-        totalLoads === page
-          ? this.setState({ isShowLoadMore: false })
-          : this.setState({ isShowLoader: true });
+        this.setState({ isShowLoader: true });
         const images = await fetchImagesWithQuery(query, page);
         this.setState({ images: [...this.state.images, ...images.response] });
-        this.state.isShowLoadMore
-          ? toast.info('Loaded more images', toastConfig)
-          : toast.warning("That's all images", toastConfig);
+        if (this.state.totalLoads / this.state.page === 1) {
+          this.setState({
+            isShowLoadMore: false,
+          });
+        }
+        toast.info('Loaded more images', toastConfig);
       } catch (error) {
         console.log(error);
         toast.error(error.message, toastConfig);
