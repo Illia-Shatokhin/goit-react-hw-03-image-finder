@@ -27,7 +27,6 @@ export class App extends Component {
     query: '',
     page: 1,
     isShowLoadMore: false,
-    totalLoads: 0,
     isShowLoader: false,
     isShowModal: false,
     largeImage: '',
@@ -35,19 +34,19 @@ export class App extends Component {
 
   async componentDidUpdate(prevProps, prevState) {
     const { query, page } = this.state;
-    if (query !== prevState.query) {
+    console.log(this.state, prevState);
+    if (query !== prevState.query || page !== prevState.page) {
       try {
         this.setState({ isShowLoader: true });
         const images = await fetchImagesWithQuery(query, page);
         this.setState(
           {
-            images: images.response,
-            totalLoads: Math.ceil(images.totalHits / 12),
+            images: [...this.state.images, ...images.response],
             isShowLoadMore: true,
           },
           () => {
             if (
-              this.state.totalLoads / this.state.page === 1 ||
+              Math.ceil(images.totalHits / 12) / this.state.page === 1 ||
               this.state.images.length === 0
             ) {
               this.setState({
@@ -56,30 +55,6 @@ export class App extends Component {
             }
           }
         );
-        images.response.length
-          ? toast.success(
-              `Your posts were successfully fetched! ${images.totalHits} results`,
-              toastConfig
-            )
-          : toast.error(`Haven't images with name: ${query}!`, toastConfig);
-      } catch (error) {
-        console.log(error);
-        toast.error(error.message, toastConfig);
-      } finally {
-        this.setState({ isShowLoader: false });
-      }
-    }
-    if (page !== prevState.page && page !== 1) {
-      try {
-        this.setState({ isShowLoader: true });
-        const images = await fetchImagesWithQuery(query, page);
-        this.setState({ images: [...this.state.images, ...images.response] });
-        if (this.state.totalLoads / this.state.page === 1) {
-          this.setState({
-            isShowLoadMore: false,
-          });
-        }
-        toast.info('Loaded more images', toastConfig);
       } catch (error) {
         console.log(error);
         toast.error(error.message, toastConfig);
@@ -93,17 +68,17 @@ export class App extends Component {
     e.preventDefault();
     const input = e.target.querySelector('input');
     const query = input.value.trim();
-    query &&
+    if (query && query !== this.state.query) {
       this.setState({
         query: input.value.trim(),
         page: 1,
         images: [],
-        totalLoads: 0,
       });
+    }
     input.value = '';
   };
 
-  onClick = e => {
+  onClick = () => {
     this.setState({ page: this.state.page + 1 });
   };
 
@@ -117,7 +92,7 @@ export class App extends Component {
   };
 
   closeModal = e => {
-    if (e.target.nodeName === 'DIV') {
+    if (e.target === e.currentTarget) {
       this.setState({ isShowModal: false, largeImage: '' });
       window.removeEventListener('keydown', this.escListener);
     }
